@@ -35,13 +35,10 @@ void stripWithWhitespace(const std::string& str, size_t start, size_t end, std::
 }
 
 
-std::string stripComments(const std::string& str, bool whitespace) {
+template <typename StripFunc>
+std::string stripCommentsImpl(const std::string& str, StripFunc strip) {
     std::string ret;
     ret.reserve(str.length());
-
-    // Function to use for stripping text.
-    // TODO: make into template param for faster code?
-    stripFunction strip = whitespace ? stripWithWhitespace : stripWithoutWhitespace;
 
     char currentChar, nextChar;
     bool insideString = false;
@@ -148,4 +145,13 @@ std::string stripComments(const std::string& str, bool whitespace) {
     ret.append(str, offset, str.length() - offset);
     ret.shrink_to_fit();
     return ret;
+}
+
+
+std::string stripComments(const std::string& str, bool whitespace) {
+    if (whitespace) {
+        return stripCommentsImpl(str, stripWithWhitespace);
+    } else {
+        return stripCommentsImpl(str, stripWithoutWhitespace);
+    }
 }
