@@ -17,9 +17,11 @@ void stripWithoutWhitespace(const std::string& str, size_t start, size_t end, st
 }
 
 void stripWithWhitespace(const std::string& str, size_t start, size_t end, std::string& out) {
-    for (auto it = str.begin() + start; it < str.end(); it++) {
-        if (isspace(*it)) {
-            out.push_back(*it);
+    for (size_t i = start; i < end; i++) {
+        char ch = str[i];
+
+        if (isspace(ch)) {
+            out.push_back(ch);
         } else {
             out.push_back(' ');
         }
