@@ -7,12 +7,18 @@
 #define COMMENT_TYPE_SINGLE 1
 #define COMMENT_TYPE_MULTI  2
 
+#undef STATE_DEBUG
+
 
 typedef void (*stripFunction)(const std::string& str, size_t start, size_t end, std::string& out);
 
 
 void stripWithoutWhitespace(const std::string& str, size_t start, size_t end, std::string& out) {
     // Do nothing.
+    ((void)str);
+    ((void)start);
+    ((void)end);
+    ((void)out);
     return;
 }
 
@@ -72,8 +78,11 @@ std::string stripComments(const std::string& str, bool whitespace) {
         }
 
         if (commentType == COMMENT_TYPE_NONE && currentChar == '/' && nextChar == '/') {
-            // std::cerr << "[no comment] found single comment, adding slice from " << offset << " to " << i << std::endl;
-            // std::cerr << "str:\n" << ret << std::endl;
+#if STATE_DEBUG
+            std::cerr << "[no comment] found single comment, adding slice from " << offset << " to " << i << std::endl;
+            std::cerr << "str:\n" << ret << std::endl;
+#endif
+
             ret.append(str, offset, i - offset);
             offset = i;
             commentType = COMMENT_TYPE_SINGLE;
@@ -81,8 +90,10 @@ std::string stripComments(const std::string& str, bool whitespace) {
             // Skip second '/'
             i++;
         } else if (commentType == COMMENT_TYPE_SINGLE && currentChar == '\r' && nextChar == '\n') {
-            // std::cerr << "[single comment] exiting comment (1), stripping slice from " << offset << " to " << i << std::endl;
-            // std::cerr << "str:\n" << ret << std::endl;
+#if STATE_DEBUG
+            std::cerr << "[single comment] exiting comment (1), stripping slice from " << offset << " to " << i << std::endl;
+            std::cerr << "str:\n" << ret << std::endl;
+#endif
 
             // Skip '\r'
             i++;
@@ -93,15 +104,19 @@ std::string stripComments(const std::string& str, bool whitespace) {
 
             continue;
         } else if (commentType == COMMENT_TYPE_SINGLE && currentChar == '\n') {
-            // std::cerr << "[single comment] exiting comment (2), stripping slice from " << offset << " to " << i << std::endl;
-            // std::cerr << "str:\n" << ret << std::endl;
+#if STATE_DEBUG
+            std::cerr << "[single comment] exiting comment (2), stripping slice from " << offset << " to " << i << std::endl;
+            std::cerr << "str:\n" << ret << std::endl;
+#endif
 
             commentType = COMMENT_TYPE_NONE;
             strip(str, offset, i, ret);
             offset = i;
         } else if (commentType == COMMENT_TYPE_NONE && currentChar == '/' && nextChar == '*') {
-            // std::cerr << "[no comment] found multi comment, adding slice from " << offset << " to " << i << std::endl;
-            // std::cerr << "str:\n" << ret << std::endl;
+#if STATE_DEBUG
+            std::cerr << "[no comment] found multi comment, adding slice from " << offset << " to " << i << std::endl;
+            std::cerr << "str:\n" << ret << std::endl;
+#endif
 
             ret.append(str, offset, i - offset);
             offset = i;
@@ -111,8 +126,10 @@ std::string stripComments(const std::string& str, bool whitespace) {
             i++;
             continue;
         } else if (commentType == COMMENT_TYPE_MULTI && currentChar == '*' && nextChar == '/') {
-            // std::cerr << "[multi comment] exiting comment, stripping slice from " << offset << " to " << (i + 1) << std::endl;
-            // std::cerr << "str:\n" << ret << std::endl;
+#if STATE_DEBUG
+            std::cerr << "[multi comment] exiting comment, stripping slice from " << offset << " to " << (i + 1) << std::endl;
+            std::cerr << "str:\n" << ret << std::endl;
+#endif
 
             // Skip '*'
             i++;
@@ -124,7 +141,11 @@ std::string stripComments(const std::string& str, bool whitespace) {
         }
     }
 
-    // std::cerr << "[done] adding substring from " << offset << " to end" << std::endl;
+#if STATE_DEBUG
+    std::cerr << "[done] adding substring from " << offset << " to end" << std::endl;
+#endif
+
     ret.append(str, offset, str.length() - offset);
+    ret.shrink_to_fit();
     return ret;
 }
